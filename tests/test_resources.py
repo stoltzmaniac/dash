@@ -61,11 +61,7 @@ class TestResources(unittest.TestCase):
 
         layout = Div([None, 'string', Span(), Div(Input())])
 
-        if css_or_js == 'css':
-            resources = Css(layout)
-        else:
-            resources = Scripts(layout)
-
+        resources = Css(layout) if css_or_js == 'css' else Scripts(layout)
         resources._update_layout(layout)
 
         expected_filtered_external_resources = [
@@ -138,20 +134,16 @@ class TestResources(unittest.TestCase):
                     resources.get_all_css(),
                     expected_filtered_relative_resources
                 )
-                assert len(w) == 1
-                assert "A local version of {} is not available".format(
-                    extra_resource['external_url']
-                ) in str(w[-1].message)
-
             else:
                 self.assertEqual(
                     resources.get_all_scripts(),
                     expected_filtered_relative_resources
                 )
-                assert len(w) == 1
-                assert "A local version of {} is not available".format(
-                    extra_resource['external_url']
-                ) in str(w[-1].message)
+
+            assert len(w) == 1
+            assert "A local version of {} is not available".format(
+                extra_resource['external_url']
+            ) in str(w[-1].message)
 
     def test_js_resources(self):
         #self.resource_test('js')

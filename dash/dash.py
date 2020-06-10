@@ -177,7 +177,9 @@ class Dash(object):
 
     @layout.setter
     def layout(self, value):
-        if not isinstance(value, Component) and not isinstance(value, collections.Callable):
+        if not (
+            isinstance(value, Component) or isinstance(value, collections.Callable)
+        ):
             raise Exception(
                 ''
                 'Layout must be a dash component '
@@ -417,9 +419,11 @@ class Dash(object):
                             name.lower(), str(arg), name
                         ))
 
-                if (not self.config.supress_callback_exceptions and
-                        arg.component_id not in layout and
-                        arg.component_id != getattr(layout, 'id', None)):
+                if not (
+                    self.config.supress_callback_exceptions
+                    or arg.component_id in layout
+                    or arg.component_id == getattr(layout, 'id', None)
+                ):
                     raise exceptions.NonExistantIdException('''
                         Attempting to assign a callback to the
                         component with the id "{}" but no
@@ -581,11 +585,14 @@ class Dash(object):
         args = []
         for component_registration in self.callback_map[target_id]['inputs']:
             component_id = component_registration['id']
-            args.append([
-                c.get('value', None) for c in inputs if
-                c['property'] == component_registration['property'] and
-                c['id'] == component_registration['id']
-            ][0])
+            args.append(
+                [
+                    c.get('value', None)
+                    for c in inputs
+                    if c['property'] == component_registration['property']
+                    and c['id'] == component_id
+                ][0]
+            )
 
         for component_registration in self.callback_map[target_id]['state']:
             component_id = component_registration['id']

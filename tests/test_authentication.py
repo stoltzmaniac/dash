@@ -89,8 +89,7 @@ def get_cookie(res, cookie_name):
         h[0] == 'Set-Cookie' and cookie_name in h[1]
     )][0][1]
     cookie = http_cookies.SimpleCookie(cookie_string)
-    access_granted_cookie = cookie[list(cookie.keys())[0]].value
-    return access_granted_cookie
+    return cookie[list(cookie.keys())[0]].value
 
 
 class ProtectedViewsTest(unittest.TestCase):
@@ -199,11 +198,11 @@ class ProtectedViewsTest(unittest.TestCase):
         app.layout = html.Div()
         app.config.permissions_cache_expiry = 30
         app.create_access_codes()
-        viewer = users['viewer']['oauth_token']
-
         creator = users['creator']['oauth_token']
         with mock.patch('dash.authentication.check_view_access',
-                        wraps=authentication.check_view_access) as wrapped:
+                            wraps=authentication.check_view_access) as wrapped:
+            viewer = users['viewer']['oauth_token']
+
             # sanity check the endpoints when the app is private
             self.check_endpoints(app, viewer)
             self.assertEqual(wrapped.call_count, n_protected_endpoints)
@@ -254,9 +253,9 @@ class ProtectedViewsTest(unittest.TestCase):
         )
         app.layout = html.Div()
 
-        creator = users['creator']['oauth_token']
         with mock.patch('dash.authentication.check_view_access',
-                        wraps=authentication.check_view_access) as wrapped:
+                            wraps=authentication.check_view_access) as wrapped:
+            creator = users['creator']['oauth_token']
             self.check_endpoints(app, creator)
             res = self.check_endpoints(app, creator)
             self.assertEqual(wrapped.call_count, 2 * n_protected_endpoints)

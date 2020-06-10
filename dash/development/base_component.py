@@ -26,7 +26,7 @@ class Component(collections.MutableMapping):
             setattr(self, k, v)
 
     def to_plotly_json(self):
-        as_json = {
+        return {
             'props': {p: getattr(self, p)
                       for p in self._prop_names
                       if hasattr(self, p)},
@@ -34,12 +34,14 @@ class Component(collections.MutableMapping):
             'namespace': self._namespace
         }
 
-        return as_json
-
     def _check_if_has_indexable_children(self, item):
-        if (not hasattr(item, 'children') or
-                (not isinstance(item.children, Component) and
-                 not isinstance(item.children, collections.MutableSequence))):
+        if not (
+            hasattr(item, 'children')
+            and (
+                isinstance(item.children, Component)
+                or isinstance(item.children, collections.MutableSequence)
+            )
+        ):
 
             raise KeyError
 
@@ -254,8 +256,7 @@ def generate_class(typename, props, description, namespace):
 
     scope = {'Component': Component}
     exec(d, scope)
-    result = scope[typename]
-    return result
+    return scope[typename]
 
 
 def required_props(props):
